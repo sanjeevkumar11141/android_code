@@ -1,0 +1,61 @@
+    <string name="appbar_scrolling_view_behavior" translatable="false">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</string>
+
+
+ app:layout_behavior="@string/appbar_scrolling_view_behavior"
+
+
+<android.support.design.widget.TabLayout
+                android:id="@+id/htab_tabs"
+                android:layout_width="wrap_content"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_gravity="bottom"
+                app:tabIndicatorColor="@android:color/white"
+                app:tabMode="scrollable" />
+
+
+
+
+
+/*************To check App is BackGround or ForeGround ************************/
+
+
+check if the app is in background or foreground. This method will return true if the app is in background.
+
+First add the GET_TASKS permission to your AndroidManifest.xml
+
+
+
+private boolean isAppIsInBackground(Context context) {
+    boolean isInBackground = true;
+    ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH) {
+        List<ActivityManager.RunningAppProcessInfo> runningProcesses = am.getRunningAppProcesses();
+        for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
+            if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                for (String activeProcess : processInfo.pkgList) {
+                    if (activeProcess.equals(context.getPackageName())) {
+                        isInBackground = false;
+                    }
+                }
+            }
+        }
+    } else {
+        List<ActivityManager.RunningTaskInfo> taskInfo = am.getRunningTasks(1);
+        ComponentName componentInfo = taskInfo.get(0).topActivity;
+        if (componentInfo.getPackageName().equals(context.getPackageName())) {
+            isInBackground = false;
+        }
+    }
+
+    return isInBackground;
+}
+
+
+
+
+
+
+
+
+
+
