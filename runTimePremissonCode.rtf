@@ -1,0 +1,247 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Menlo-Bold;\f2\fnil\fcharset0 Menlo-BoldItalic;
+\f3\fnil\fcharset0 Menlo-Regular;\f4\fnil\fcharset0 Menlo-Italic;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue109;\red82\green0\blue103;\red0\green0\blue254;
+\red109\green111\blue5;\red109\green109\blue109;\red15\green112\blue3;}
+{\*\expandedcolortbl;;\csgenericrgb\c0\c0\c42745;\csgenericrgb\c32157\c0\c40392;\csgenericrgb\c0\c0\c99608;
+\csgenericrgb\c42745\c43529\c1961;\csgenericrgb\c42745\c42745\c42745;\csgenericrgb\c5882\c43922\c1176;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs28 \cf0  
+\f1\b \cf2 private static final int 
+\f2\i \cf3 REQUEST_CODE 
+\f3\i0\b0 \cf0 = \cf4 100\cf0 ;\
+    
+\f1\b \cf2 private static final int 
+\f2\i \cf3 MY_PERMISSIONS_REQUEST_READ_CONTACTS 
+\f3\i0\b0 \cf0 = \cf4 110\cf0 ;\
+\
+    \cf5 @Override\
+    
+\f1\b \cf2 protected void 
+\f3\b0 \cf0 onCreate(Bundle savedInstanceState) \{\
+        
+\f1\b \cf2 super
+\f3\b0 \cf0 .onCreate(savedInstanceState);\
+        setContentView(R.layout.
+\f2\i\b \cf3 activity_main2
+\f3\i0\b0 \cf0 );\
+        Button button = findViewById(R.id.
+\f2\i\b \cf3 button
+\f3\i0\b0 \cf0 );\
+        button.setOnClickListener(
+\f1\b \cf2 new 
+\f3\b0 \cf0 View.OnClickListener() \{\
+            \cf5 @Override\
+            
+\f1\b \cf2 public void 
+\f3\b0 \cf0 onClick(View v) \{\
+                checkPremission();\
+            \}\
+        \});\
+    \}\
+\
+    
+\f1\b \cf2 public void 
+\f3\b0 \cf0 checkPremission()\{\
+\
+        
+\f4\i \cf6 // Here, thisActivity is the current activity\
+        
+\f1\i0\b \cf2 if 
+\f3\b0 \cf0 (ContextCompat.
+\f4\i checkSelfPermission
+\f3\i0 (MainActivity.
+\f1\b \cf2 this
+\f3\b0 \cf0 , Manifest.permission.
+\f2\i\b \cf3 READ_CONTACTS
+\f3\i0\b0 \cf0 ) != PackageManager.
+\f2\i\b \cf3 PERMISSION_GRANTED
+\f3\i0\b0 \cf0 ) \{\
+\
+            
+\f4\i \cf6 // Permission is not granted\
+            // Should we show an explanation?\
+            
+\f1\i0\b \cf2 if 
+\f3\b0 \cf0 (ActivityCompat.
+\f4\i shouldShowRequestPermissionRationale
+\f3\i0 (MainActivity.
+\f1\b \cf2 this
+\f3\b0 \cf0 ,\
+                    Manifest.permission.
+\f2\i\b \cf3 READ_CONTACTS
+\f3\i0\b0 \cf0 )) \{\
+                
+\f4\i \cf6 // Show an explanation to the user *asynchronously* -- don't block\
+                // this thread waiting for the user's response! After the user\
+                // sees the explanation, try again to request the permission.\
+                
+\f3\i0 \cf0 AlertDialog alertDialog = 
+\f1\b \cf2 new 
+\f3\b0 \cf0 AlertDialog.Builder(
+\f1\b \cf2 this
+\f3\b0 \cf0 ).create();\
+                alertDialog.setTitle(
+\f1\b \cf7 "Camera Permission"
+\f3\b0 \cf0 );\
+                alertDialog.setMessage(
+\f1\b \cf7 "Camera permission is required to in order to " 
+\f3\b0 \cf0 +\
+                        
+\f1\b \cf7 "provide photo capture feature"
+\f3\b0 \cf0 );\
+                alertDialog.setButton(AlertDialog.
+\f2\i\b \cf3 BUTTON_NEUTRAL
+\f3\i0\b0 \cf0 , 
+\f1\b \cf7 "OK"
+\f3\b0 \cf0 ,\
+                        
+\f1\b \cf2 new 
+\f3\b0 \cf0 DialogInterface.OnClickListener() \{\
+                            
+\f1\b \cf2 public void 
+\f3\b0 \cf0 onClick(DialogInterface dialog, 
+\f1\b \cf2 int 
+\f3\b0 \cf0 id) \{\
+                                ActivityCompat.
+\f4\i requestPermissions
+\f3\i0 (MainActivity.
+\f1\b \cf2 this
+\f3\b0 \cf0 , 
+\f1\b \cf2 new 
+\f3\b0 \cf0 String[]\{Manifest.permission.
+\f2\i\b \cf3 READ_CONTACTS
+\f3\i0\b0 \cf0 \},\
+                                        
+\f2\i\b \cf3 MY_PERMISSIONS_REQUEST_READ_CONTACTS
+\f3\i0\b0 \cf0 );\
+                                dialog.dismiss();\
+                            \}\
+                        \});\
+                alertDialog.show();\
+\
+\
+\
+            \} 
+\f1\b \cf2 else 
+\f3\b0 \cf0 \{\
+                
+\f4\i \cf6 // No explanation needed; request the permission\
+                
+\f3\i0 \cf0 ActivityCompat.
+\f4\i requestPermissions
+\f3\i0 (MainActivity.
+\f1\b \cf2 this
+\f3\b0 \cf0 ,\
+                        
+\f1\b \cf2 new 
+\f3\b0 \cf0 String[]\{Manifest.permission.
+\f2\i\b \cf3 READ_CONTACTS
+\f3\i0\b0 \cf0 \},\
+                        
+\f2\i\b \cf3 MY_PERMISSIONS_REQUEST_READ_CONTACTS
+\f3\i0\b0 \cf0 );\
+\
+                
+\f4\i \cf6 // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an\
+                // app-defined int constant. The callback method gets the\
+                // result of the request.\
+            
+\f3\i0 \cf0 \}\
+        \} 
+\f1\b \cf2 else 
+\f3\b0 \cf0 \{\
+            
+\f4\i \cf6 // Permission has already been granted\
+\
+            
+\f3\i0 \cf0 Toast.
+\f4\i makeText
+\f3\i0 (
+\f1\b \cf2 this
+\f3\b0 \cf0 , 
+\f1\b \cf7 "Permission has already been granted"
+\f3\b0 \cf0 , Toast.
+\f2\i\b \cf3 LENGTH_SHORT
+\f3\i0\b0 \cf0 ).show();\
+        \}\
+    \}\
+\
+\
+\
+    \cf5 @Override\
+    
+\f1\b \cf2 public void 
+\f3\b0 \cf0 onRequestPermissionsResult(
+\f1\b \cf2 int 
+\f3\b0 \cf0 requestCode,\
+                                           String[] permissions, 
+\f1\b \cf2 int
+\f3\b0 \cf0 [] grantResults) \{\
+        
+\f1\b \cf2 switch 
+\f3\b0 \cf0 (requestCode) \{\
+            
+\f1\b \cf2 case 
+\f2\i \cf3 MY_PERMISSIONS_REQUEST_READ_CONTACTS
+\f3\i0\b0 \cf0 : \{\
+                
+\f4\i \cf6 // If request is cancelled, the result arrays are empty.\
+                
+\f1\i0\b \cf2 if 
+\f3\b0 \cf0 (grantResults.
+\f1\b \cf3 length 
+\f3\b0 \cf0 > \cf4 0\
+                        \cf0 && grantResults[\cf4 0\cf0 ] == PackageManager.
+\f2\i\b \cf3 PERMISSION_GRANTED
+\f3\i0\b0 \cf0 ) \{\
+                    
+\f4\i \cf6 // permission was granted, yay! Do the\
+                    // contacts-related task you need to do.\
+\
+                    
+\f3\i0 \cf0 Toast.
+\f4\i makeText
+\f3\i0 (
+\f1\b \cf2 this
+\f3\b0 \cf0 , 
+\f1\b \cf7 "Permission granted"
+\f3\b0 \cf0 , Toast.
+\f2\i\b \cf3 LENGTH_SHORT
+\f3\i0\b0 \cf0 ).show();\
+\
+                \} 
+\f1\b \cf2 else 
+\f3\b0 \cf0 \{\
+                    
+\f4\i \cf6 // permission denied, boo! Disable the\
+                    // functionality that depends on this permission.\
+\
+                    
+\f3\i0 \cf0 Toast.
+\f4\i makeText
+\f3\i0 (
+\f1\b \cf2 this
+\f3\b0 \cf0 , 
+\f1\b \cf7 "Permission denied"
+\f3\b0 \cf0 , Toast.
+\f2\i\b \cf3 LENGTH_SHORT
+\f3\i0\b0 \cf0 ).show();\
+                \}\
+                
+\f1\b \cf2 return
+\f3\b0 \cf0 ;\
+            \}\
+\
+            
+\f4\i \cf6 // other 'case' lines to check for other\
+            // permissions this app might request.\
+        
+\f3\i0 \cf0 \}\
+    \}\
+\
+\
+\}\
+}
