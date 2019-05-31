@@ -1,0 +1,386 @@
+package com.thermogo;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
+import com.flir.flironesdk.Frame;
+import com.flir.flironesdk.FrameProcessor;
+import com.flir.flironesdk.LoadedFrame;
+import com.flir.flironesdk.RenderedImage;
+import com.squareup.picasso.Picasso;
+import com.thermogo.application.ThermoGoApp;
+import com.thermogo.model.Image;
+import com.thermogo.model.Images;
+import com.thermogo.restapi.APIServiceInterface;
+import com.thermogo.restapi.RestClient;
+import com.thermogo.util.AppUtil;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Locale;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class ImagesActivity extends AppCompatActivity implements FrameProcessor.Delegate {
+
+    Toolbar toolbar;
+
+    GridView gridview;
+    ImageView image;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_images);
+
+        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        TextView toolBarTitle = (TextView) toolbar.findViewById(R.id.toolbar_title);
+        ImageView toolbar_rightImg = (ImageView) toolbar.findViewById(R.id.toolbar_rightImg);
+        toolbar_rightImg.setVisibility(View.INVISIBLE);
+        toolBarTitle.setText("Your Image");
+        toolbar.setNavigationIcon(R.drawable.back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+
+        image = (ImageView) findViewById(R.id.image);
+        gridview = (GridView) findViewById(R.id.gridview);
+        gridview.setAdapter(new ImageAdapterGridView(ImagesActivity.this,ThermoGoApp.getInstance().imageList));
+    }
+
+     public void openImage(String imagePath){
+        LoadedFrame loadedFrame = new LoadedFrame(new File(imagePath));
+        FrameProcessor frameProcessor = new FrameProcessor(this, this, EnumSet.of(RenderedImage.ImageType.ThermalRadiometricKelvinImage), true);
+        frameProcessor.processFrame(loadedFrame);
+    }
+
+    /*public void openImage(File imagePath){
+        LoadedFrame loadedFrame = new LoadedFrame(imagePath);
+        FrameProcessor frameProcessor = new FrameProcessor(this, this, EnumSet.of(RenderedImage.ImageType.ThermalRadiometricKelvinImage), true);
+        frameProcessor.processFrame(loadedFrame);
+    }*/
+
+
+    public void onFrameProcessed(final RenderedImage renderedImage){
+        if (renderedImage.imageType() == RenderedImage.ImageType.ThermalRadiometricKelvinImage){
+            // Note: this code is not optimized
+
+            int[] thermalPixels = renderedImage.thermalPixelValues();
+            // average the center 9 pixels for the spot meter
+
+            int width = renderedImage.width();
+            int height = renderedImage.height();
+            int centerPixelIndex = width * (height/2) + (width/2);
+            int[] centerPixelIndexes = new int[] {
+                    centerPixelIndex, centerPixelIndex-1, centerPixelIndex+1,
+                    centerPixelIndex - width,
+                    centerPixelIndex - width - 1,
+                    centerPixelIndex - width + 1,
+                    centerPixelIndex + width,
+                    centerPixelIndex + width - 1,
+                    centerPixelIndex + width + 1
+            };
+
+            double averageTemp = 0;
+
+            for (int i = 0; i < centerPixelIndexes.length; i++){
+                // Remember: all primitives are signed, we want the unsigned value,
+                // we've used renderedImage.thermalPixelValues() to get unsigned values
+                int pixelValue = (thermalPixels[centerPixelIndexes[i]]);
+                averageTemp += (((double)pixelValue) - averageTemp) / ((double) i + 1);
+            }
+            double averageC = (averageTemp / 100) - 273.15;
+            NumberFormat numberFormat = NumberFormat.getInstance();
+            numberFormat.setMaximumFractionDigits(2);
+            numberFormat.setMinimumFractionDigits(2);
+            final String spotMeterValue = numberFormat.format(averageC) + "ºC";
+            /*runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ((TextView)findViewById(R.id.spotMeterValue)).setText(spotMeterValue);
+                }
+            });*/
+        }
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
+
+
+    public class ImageAdapterGridView extends BaseAdapter {
+        private Context mContext;
+        ArrayList<String> filePaths = new ArrayList<>();
+        ArrayList<String> imageTimeList ;
+
+        List<Image> imageList;
+
+
+
+        public ImageAdapterGridView(Context c,List imageList) {
+            mContext = c;
+            this.imageList= imageList;
+
+
+
+            /*filePaths = new ArrayList<>();
+            imageTimeList = new ArrayList<>();
+
+          //  AppUtil.getAllImages(mContext,"FLIROne_Images");
+
+            imageTimeList = AppUtil.getTime(mContext);
+
+            System.out.println();
+
+            File path = c.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            if( path != null && path.isDirectory()){
+               String[] files =  path.list();
+               for( String f : files){
+                   if ( f.startsWith("FLIROne-")) {
+                       filePaths.add(path.getAbsolutePath()+"/"+ f);
+                   }
+               }
+               int count = files.length;
+            }*/
+
+        }
+
+        public int getCount() {
+//            return imageIDs.length;
+           // return filePaths.size();
+            return imageList.size();
+        }
+
+        public Object getItem(int position) {
+            return null;
+        }
+
+        public long getItemId(int position) {
+            return 0;
+        }
+
+
+
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            View itemView = null;
+            final ImageView imageView;
+            final TextView textView;
+
+            if (itemView == null) {
+                itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_row, parent, false);
+            }
+            imageView = itemView.findViewById(R.id.imageView);
+            textView = itemView.findViewById(R.id.time);
+
+           // textView.setText(imageTimeList.get(position));
+
+
+            /*final String currentPhotoPath = filePaths.get(position);
+            Bitmap imageBitmap = BitmapFactory.decodeFile(currentPhotoPath);
+            imageView.setImageBitmap(imageBitmap);
+
+            final String imagePath = currentPhotoPath;
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openImage(imagePath);
+                }
+            });*/
+
+
+            final Image image = imageList.get(position);
+
+            Picasso.get()
+                    .load(image.getUrl())
+                    .into(imageView);
+
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+
+                    /*BitmapDrawable  bitmapDrawable = (BitmapDrawable) imageView.getDrawable().getCurrent();
+                    Bitmap bitmap = bitmapDrawable.getBitmap();
+
+                    File filesDir = getFilesDir();
+                    File imageFile = new File(filesDir, "flir" + ".jpg");
+
+                    OutputStream os;
+                    try {
+                        os = new FileOutputStream(imageFile);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+                        os.flush();
+                        os.close();
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(), "Error writing bitmap", e);
+                    }*/
+
+                    APIServiceInterface apiServiceInterface = RestClient.getAPIServiceInterface();
+                    Call<ResponseBody> call = apiServiceInterface.fetchCaptcha(image.getUrl());
+                    call.enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()) {
+                                if (response.body() != null) {
+                                    // display the image data in a ImageView or save it
+                                   // Bitmap bm = BitmapFactory.decodeStream(response.body().byteStream());
+
+                                    DownloadImage(response.body());
+
+                                } else {
+                                    // TODO
+                                }
+                            } else {
+                                // TODO
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            // TODO
+                        }
+                    });
+
+                     openImage(getExternalFilesDir(null) + File.separator + "flir.jpg");
+                }
+            });
+
+            return itemView;
+        }
+
+
+        private boolean DownloadImage(ResponseBody body) {
+
+            try {
+
+                 String file =   getExternalFilesDir(null) + File.separator + "flir.jpg";
+                InputStream in = null;
+                FileOutputStream out = null;
+
+                try {
+                    in = body.byteStream();
+                    out = new FileOutputStream(getExternalFilesDir(null) + File.separator + "flir.jpg");
+                    int c;
+
+                    while ((c = in.read()) != -1) {
+                        out.write(c);
+                    }
+                }
+                catch (IOException e) {
+                    Log.d("DownloadImage",e.toString());
+                    return false;
+                }
+                finally {
+                    if (in != null) {
+                        in.close();
+                    }
+                    if (out != null) {
+                        out.close();
+                    }
+                }
+
+                return true;
+
+            } catch (IOException e) {
+                Log.d("DownloadImage",e.toString());
+                return false;
+            }
+        }
+
+
+
+        public  String getAllImages(Context ctx){
+            String data ="";
+            try{
+
+               // getExternalFilesDir(null) + File.separator + "flir.jpg"
+
+
+                File file = ctx.getExternalFilesDir(null);
+                File dataFile = new File(file.getAbsolutePath() + "/" + "flir.jpg");
+
+                String image [] = dataFile.list();
+
+                if (dataFile.exists()) {
+                    BufferedReader in = new BufferedReader(new FileReader(dataFile));
+                    StringBuffer buff = new StringBuffer();
+                    String dt = null;
+                    while ((dt=in.readLine()) != null){
+                        buff.append(dt);
+                    }
+                    data = buff.toString();
+                    in.close();
+
+                }
+            }catch(Exception e){
+                e.printStackTrace();
+                Log.d("File","Get image failed "+ e.getMessage());
+            }
+            return data;
+        }
+
+
+        /*public String read (Context c) throws IOException{
+
+            File dataFile = new File(getExternalFilesDir(null) + File.separator + "flir.jpg");
+
+            StringBuffer buffer = new StringBuffer();
+            String read;
+
+            FileInputStream fis = new FileInputStream(getExternalFilesDir(null) + File.separator + "flir.jpg");
+            //FileInputStream fis = c.openFileInput(getExternalFilesDir(null) + File.separator + "flir.jpg");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            if (fis!=null) {
+                while ((read = reader.readLine()) != null) {
+                    buffer.append(read + "\n" );
+                }
+            }
+            fis.close();
+            return buffer.toString();
+        }*/
+    }
+}
