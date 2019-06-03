@@ -1,0 +1,385 @@
+package com.thermogo;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
+import com.flir.flironesdk.Frame;
+import com.flir.flironesdk.FrameProcessor;
+import com.flir.flironesdk.LoadedFrame;
+import com.flir.flironesdk.RenderedImage;
+import com.squareup.picasso.Picasso;
+import com.thermogo.application.ThermoGoApp;
+import com.thermogo.model.Image;
+import com.thermogo.model.Images;
+import com.thermogo.restapi.APIServiceInterface;
+import com.thermogo.restapi.RestClient;
+import com.thermogo.util.AppUtil;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Locale;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class ImagesActivity extends AppCompatActivity implements FrameProcessor.Delegate {
+
+    Toolbar toolbar;
+
+    GridView gridview;
+    ImageView image;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_images);
+
+        toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        TextView toolBarTitle = (TextView) toolbar.findViewById(R.id.toolbar_title);
+        ImageView toolbar_rightImg = (ImageView) toolbar.findViewById(R.id.toolbar_rightImg);
+        toolbar_rightImg.setVisibility(View.INVISIBLE);
+        toolBarTitle.setText("Your Image");
+        toolbar.setNavigationIcon(R.drawable.back);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+
+        image = (ImageView) findViewById(R.id.image);
+        gridview = (GridView) findViewById(R.id.gridview);
+        gridview.setAdapter(new ImageAdapterGridView(ImagesActivity.this,ThermoGoApp.getInstance().imageList));
+    }
+
+
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
+
+    public class ImageAdapterGridView extends BaseAdapter {
+        private Context mContext;
+        ArrayList<String> filePaths = new ArrayList<>();
+        ArrayList<String> imageTimeList ;
+
+        List<Image> imageList;
+
+
+
+        public ImageAdapterGridView(Context c,List imageList) {
+            mContext = c;
+            this.imageList= imageList;
+
+        }
+
+        public int getCount() {
+            return imageList.size();
+        }
+
+        public Object getItem(int position) {
+            return null;
+        }
+
+        public long getItemId(int position) {
+            return 0;
+        }
+
+
+
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            View itemView = null;
+            final ImageView imageView;
+            final TextView textView;
+
+            if (itemView == null) {
+                itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_row, parent, false);
+            }
+
+            final Image image = imageList.get(position);
+
+            imageView = itemView.findViewById(R.id.imageView);
+            textView = itemView.findViewById(R.id.time);
+            String dateTime = AppUtil.convertStringToDate(image.getCreated_at());
+            textView.setText(dateTime);
+
+
+            Date date = null;
+            String formatteddate = null;
+
+            DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            DateFormat df1 = new SimpleDateFormat("dd-MM-yyyy-HH:mm");
+            try{
+                date = df.parse(image.getCreated_at());
+                formatteddate = df1.format(date);
+            }catch (Exception e){
+
+                e.printStackTrace();
+            }
+
+
+
+            Picasso.get()
+                    .load(image.getUrl())
+                    .into(imageView);
+
+            final String finalFormatteddate = formatteddate;
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+                    if (AppUtil.isNetworkConnected(getApplication()) == true) {
+
+                        APIServiceInterface apiServiceInterface = RestClient.getAPIServiceInterface();
+                        Call<ResponseBody> call = apiServiceInterface.fetchCaptcha(image.getUrl());
+                        call.enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if (response.isSuccessful()) {
+                                    if (response.body() != null) {
+                                        AppUtil.showDialog(mContext,"Image Storing in file...");
+                                        boolean imagepath =  DownloadImage(response.body(), finalFormatteddate);
+
+                                        if(imagepath){
+                                            AppUtil.dismissDialog(mContext);
+                                            openImage(getExternalFilesDir(null) + File.separator + finalFormatteddate+"flir.jpg",image.getStart_x(),image.getX_height());
+                                        }
+                                    } else {
+                                        Toast.makeText(mContext, "Something worng", Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Toast.makeText(mContext, "Something worng", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Toast.makeText(mContext, "Something worng", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+
+
+                }
+            });
+
+            return itemView;
+        }
+
+        private boolean DownloadImage(ResponseBody body, String dateTime) {
+
+            try {
+                InputStream in = null;
+                FileOutputStream out = null;
+
+                try {
+                    in = body.byteStream();
+                    out = new FileOutputStream(getExternalFilesDir(null) + File.separator + dateTime+"flir.jpg");
+                    int c;
+
+                    while ((c = in.read()) != -1) {
+                        out.write(c);
+                    }
+                }
+                catch (IOException e) {
+                    Log.d("DownloadImage",e.toString());
+                    return false;
+                }
+                finally {
+                    if (in != null) {
+                        in.close();
+                    }
+                    if (out != null) {
+                        out.close();
+                    }
+                }
+
+                return true;
+
+            } catch (IOException e) {
+                Log.d("DownloadImage",e.toString());
+                return false;
+            }
+        }
+    }
+
+
+    public void imageDownload(){
+
+
+    }
+
+
+
+
+    int start_x1;
+    int x1_height;
+
+    public void openImage(String imagePath,String start_x,String x_height){
+
+        start_x1 = Integer.parseInt(start_x);
+        x1_height = Integer.parseInt(x_height);
+
+        LoadedFrame loadedFrame = new LoadedFrame(new File(imagePath));
+        FrameProcessor frameProcessor = new FrameProcessor(this, this, EnumSet.of(RenderedImage.ImageType.ThermalRadiometricKelvinImage), true);
+        frameProcessor.processFrame(loadedFrame);
+
+
+
+    }
+
+    public void onFrameProcessed(final RenderedImage renderedImage){
+        if (renderedImage.imageType() == RenderedImage.ImageType.ThermalRadiometricKelvinImage){
+            // Note: this code is not optimized
+
+            int[] thermalPixels = renderedImage.thermalPixelValues();
+            // average the center 9 pixels for the spot meter
+
+            int dimn =  (start_x1 + x1_height);
+            int xValue =  start_x1;
+
+
+
+
+            long temp1=0;
+            long temp2=0;
+
+          //  int[] pixelIndexes1 = new int[240 * (506-273)];
+          //  int[] pixelIndexes2 = new int[240 * (506-273)];
+            int[] pixelIndexes1 = new int[ (240 * (dimn-xValue))];
+            int[] pixelIndexes2 = new int[ (240 * (dimn-xValue))];
+
+
+            System.out.println();
+
+            int index = 0;
+            for(int x = xValue; x<dimn; x++){
+
+                for(int y=0; y<240; y++){
+
+                  //  pixelIndexes1[index] = y* 480 + x;
+                    pixelIndexes1[index] = x* 480 + y;
+                    index++;
+                }
+            }
+
+            index = 0;
+
+            for(int x = xValue; x<dimn; x++){
+
+                for(int y=241; y<480; y++){
+
+                    pixelIndexes2[index] = x* 480 + y;
+                    index++;
+                }
+            }
+
+            System.out.println();
+
+           /* int width = renderedImage.width();
+            int height = renderedImage.height();
+            int centerPixelIndex = width * (height/2) + (width/2);
+            int[] centerPixelIndexes = new int[] {
+                    centerPixelIndex, centerPixelIndex-1, centerPixelIndex+1,
+                    centerPixelIndex - width,
+                    centerPixelIndex - width - 1,
+                    centerPixelIndex - width + 1,
+                    centerPixelIndex + width,
+                    centerPixelIndex + width - 1,
+                    centerPixelIndex + width + 1
+            };
+
+            double averageTemp = 0;
+
+            for (int i = 0; i < centerPixelIndexes.length; i++){
+                // Remember: all primitives are signed, we want the unsigned value,
+                // we've used renderedImage.thermalPixelValues() to get unsigned values
+                int pixelValue = (thermalPixels[centerPixelIndexes[i]]);
+                averageTemp += (((double)pixelValue) - averageTemp) / ((double) i + 1);
+            }
+            double averageC = (averageTemp / 100) - 273.15;
+            NumberFormat numberFormat = NumberFormat.getInstance();
+            numberFormat.setMaximumFractionDigits(2);
+            numberFormat.setMinimumFractionDigits(2);
+            final String spotMeterValue = numberFormat.format(averageC) + "ºC";
+            System.out.println();*/
+
+
+            double averageTemp1 = 0;
+
+            for (int i = 0; i < pixelIndexes1.length; i++){
+                // Remember: all primitives are signed, we want the unsigned value,
+                // we've used renderedImage.thermalPixelValues() to get unsigned values
+                int pixelValue = (thermalPixels[pixelIndexes1[i]]);
+                averageTemp1 += (((double)pixelValue) - averageTemp1) / ((double) i + 1);
+            }
+            double averageC1 = (averageTemp1 / 100) - 273.15;
+            NumberFormat numberFormat1 = NumberFormat.getInstance();
+            numberFormat1.setMaximumFractionDigits(2);
+            numberFormat1.setMinimumFractionDigits(2);
+            final String spotMeterValue1 = numberFormat1.format(averageC1) + "ºC";
+
+            System.out.println();
+
+
+            double averageTemp2 = 0;
+
+            for (int i = 0; i < pixelIndexes2.length; i++){
+                // Remember: all primitives are signed, we want the unsigned value,
+                // we've used renderedImage.thermalPixelValues() to get unsigned values
+                int pixelValue = (thermalPixels[pixelIndexes2[i]]);
+                averageTemp2 += (((double)pixelValue) - averageTemp2) / ((double) i + 1);
+            }
+            double averageC2 = (averageTemp2 / 100) - 273.15;
+            NumberFormat numberFormat2 = NumberFormat.getInstance();
+            numberFormat2.setMaximumFractionDigits(2);
+            numberFormat2.setMinimumFractionDigits(2);
+            final String spotMeterValue2 = numberFormat1.format(averageC2) + "ºC";
+
+            System.out.println();
+
+        }
+
+    }
+
+}
