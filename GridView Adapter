@@ -1,0 +1,83 @@
+public class ImageAdapterGridView extends BaseAdapter {
+        private Context mContext;
+        ArrayList<String> filePaths = new ArrayList<>();
+        ArrayList<String> imageTimeList ;
+
+        List<Image> imageList;
+
+
+
+        public ImageAdapterGridView(Context c,List imageList) {
+            mContext = c;
+            this.imageList= imageList;
+
+        }
+
+        public int getCount() {
+            return imageList.size();
+        }
+
+        public Object getItem(int position) {
+            return null;
+        }
+
+        public long getItemId(int position) {
+            return 0;
+        }
+
+
+
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            View itemView = null;
+            final ImageView imageView;
+            final TextView textView;
+
+            if (itemView == null) {
+                itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_row, parent, false);
+            }
+
+            final Image image = imageList.get(position);
+
+            imageView = itemView.findViewById(R.id.imageView);
+            textView = itemView.findViewById(R.id.time);
+           // String dateTime = AppUtil.convertStringToDate(image.getCreated_at());
+            String dateTime = AppUtil.uTCToLocal("yyyy-MM-dd HH:mm:ss","MM-dd-yyyy , HH:mm",image.getCreated_at());
+            textView.setText(dateTime);
+
+
+            Date date = null;
+            String formatteddate = null;
+
+            //DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat df1 = new SimpleDateFormat("dd-MM-yyyy-HH:mm");
+            try{
+                date = df.parse(image.getCreated_at());
+                formatteddate = df1.format(date);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+
+            Picasso.get()
+                    .load(image.getUrl())
+                    .into(imageView);
+
+            final String finalFormatteddate = formatteddate;
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    if (AppUtil.isNetworkConnected(getApplication()) == true) {
+
+                        imageDownload(image,finalFormatteddate);
+                    }
+                }
+            });
+
+            return itemView;
+        }
+
+
+    }
