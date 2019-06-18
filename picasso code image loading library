@@ -1,0 +1,18 @@
+public void setImage(String imgagePath) {
+        Picasso.with(MerchantDetails.this)
+                .load(imgagePath)
+                .resize(AppUtil.getDeviceWidth(MerchantDetails.this), image_mp.getMeasuredHeight())
+                .into(image_mp, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        // TODO Auto-generated method stub
+                        progressBarImage.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError() {
+                        // TODO Auto-generated method stub
+                        progressBarImage.setVisibility(View.GONE);
+                    }
+                });
+    }
