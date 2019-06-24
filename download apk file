@@ -1,0 +1,132 @@
+private ProgressDialog mProgressDialog;
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case 0:
+                mProgressDialog = new ProgressDialog(this);
+                mProgressDialog.setMessage("Downloading apk..");
+                mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();
+                return mProgressDialog;
+            default:
+                return null;
+        }
+    }
+
+
+    class InstallTask extends AsyncTask<Void, Integer, String> {
+
+        Context context;
+        String url;
+        private ProgressDialog progress;
+
+        public InstallTask(Context context, String url) {
+            this.context = context;
+
+            this.url = url;
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+           // setLoadingMessage("Downloading..."+String.valueOf(values[0])+" %");
+
+            /*Login.this.p = new LoadDialog(Login.this, "Downloading..."+String.valueOf(values[0])+" %");
+            Login.this.p.setCanceledOnTouchOutside(false);
+            Login.this.p.setCancelable(false);
+            setLoadingDialog(Login.this.p);*/
+
+           // ProgressDialog mProgressDialog;
+
+            mProgressDialog.setProgress(values[0]);
+            Log.e("progress: ",""+values[0]);
+
+
+        }
+
+        protected void onPreExecute() {
+            /*mProgressDialog = ProgressDialog.show(context,
+                    "Download", " Downloading in progress..");*/
+            // setLoadingMessage("Downloading...");
+           // Login.this.showLoading();
+
+            showDialog(0);
+
+        }
+
+        private String downloadapk() {
+            String result = "";
+            try {
+                URL url = new URL(this.url);
+                HttpURLConnection urlConnection = (HttpURLConnection) url
+                        .openConnection();
+                HttpURLConnection.setFollowRedirects(true);
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestProperty("Accept-Encoding", "identity");
+                // urlConnection.setInstanceFollowRedirects(true);
+                urlConnection.connect();
+
+                File sdcard = Environment.getExternalStorageDirectory();
+                //  File sdcard = Environment.getDataDirectory();
+                File file = new File(sdcard, "fcsl.apk");
+
+                FileOutputStream fileOutput = new FileOutputStream(file);
+                InputStream inputStream = urlConnection.getInputStream();
+                int contentLength = urlConnection.getContentLength();
+
+                int code = urlConnection.getResponseCode();
+                byte[] buffer = new byte[4096];
+                int bytes = urlConnection.getContentLength();
+                int bufferLength = 0;
+                int totalDownload =0;
+                while ((bufferLength = inputStream.read(buffer)) > -1) {
+                    fileOutput.write(buffer, 0, bufferLength);
+                    totalDownload+= bufferLength;
+                    onProgressUpdate(Math.round(totalDownload*100/bytes));
+                }
+                fileOutput.close();
+                result = "done";
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return result;
+        }
+
+        protected String doInBackground(Void... params) {
+            String result = downloadapk();
+            return result;
+        }
+
+        protected void onPostExecute(String result) {
+            if (result.equals("done")) {
+                Login.this.hideLoading();
+                installApk();
+                // killApplication();
+            } else {
+                Login.this.hideLoading();
+                Toast.makeText(context, "Error while downloading",
+                        Toast.LENGTH_LONG).show();
+
+            }
+        }
+
+        private void installApk() {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Uri uri = Uri.fromFile(new File(Environment.getExternalStorageDirectory()+"/fcsl.apk"));
+            intent.setDataAndType(uri, "application/vnd.android.package-archive");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            Login.this.finishAffinity();
+            System.exit(0);
+            int id= android.os.Process.myPid();
+            android.os.Process.killProcess(id);
+
+        }
+
+    }
