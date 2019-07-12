@@ -1,0 +1,14 @@
+public void calculateFileSize(String filepath) {
+        //String filepathstr=filepath.toString();
+        File file = new File(filepath);
+
+        long fileSizeInBytes = file.length();
+
+
+        float fileSizeInKB = fileSizeInBytes / 1024;
+        // Convert the KB to MegaBytes (1 MB = 1024 KBytes)
+        float fileSizeInMB = fileSizeInKB / 1024;
+
+        String calString = Float.toString(fileSizeInMB);
+        System.out.println();
+    }
