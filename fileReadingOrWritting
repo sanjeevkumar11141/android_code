@@ -1,0 +1,114 @@
+
+
+//Using file reader or writter
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class ExampleFileHandling {
+    public static void main(String[] args) {
+
+        String data ="this ia second time precites to file handling";
+        File file = new File("/Users/madept/Desktop/upload.txt");
+
+        FileWriter fileWriter;
+        try {
+            if(file.exists()){
+                file.delete();
+            }
+            file.createNewFile();
+            fileWriter = new FileWriter(file,true);
+            fileWriter.write("appned wale data start here ok");
+            fileWriter.close();
+
+            //file.createNewFile()
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ExampleFileHandling exampleFileHandling =new ExampleFileHandling();
+        exampleFileHandling.readFileData();
+
+    }
+
+    private void readFileData(){
+
+        System.out.println("File Reading content from ");
+
+        StringBuilder builder= new StringBuilder();
+        String str= null;
+
+
+        File file = new File("/Users/madept/Desktop/upload.txt");
+        FileReader fileReader;
+
+        int ch;
+        try{
+            fileReader = new FileReader(file);
+
+            while((ch =fileReader.read()) != -1){
+
+                builder.append((char)ch);
+
+               // System.out.print((char)ch);
+               // System.out.print(builder.toString());
+
+            }
+            System.out.println("Here builder ");
+            System.out.print(builder.toString());
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+}
+
+
+//*********************using bufferReader or bufferwriter*********************//
+
+private static void usingBufferedWritter(){
+
+        String data = "writting data using BufferWriter ok first method";
+
+        BufferedWriter bufferedWriter;
+        try{
+
+            bufferedWriter = new BufferedWriter(new FileWriter("/Users/madept/Desktop/Test/java1.txt"));
+            bufferedWriter.write(data);
+            bufferedWriter.close();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        System.out.println("data write successfully");
+    }
+
+    private static void usingBufferReaderReadData(){
+
+        System.out.println("****** data reading process ******" );
+
+        StringBuilder builder = new StringBuilder();
+        String cuurentLine= null;
+        BufferedReader reader;
+        try{
+
+            File file;
+            reader = new BufferedReader(new FileReader("/Users/madept/Desktop/Test/java1.txt"));
+
+            while((cuurentLine = reader.readLine()) != null){
+
+                builder.append(cuurentLine).append("\n");
+            }
+
+        }catch (Exception e){
+           e.printStackTrace();
+        }
+
+        System.out.println("data  reading using BufferReader"+"\n"+builder.toString());
+
+    }
+
