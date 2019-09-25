@@ -1,0 +1,22 @@
+ boolean doubleBackToExitPressedOnce;
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+
+        if(doubleBackToExitPressedOnce){
+            finish();
+        }
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                doubleBackToExitPressedOnce=false;
+
+            }
+        },2000);
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Press back again to leave", Toast.LENGTH_SHORT).show();
+    }
