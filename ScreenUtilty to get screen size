@@ -1,0 +1,27 @@
+public class ScreenUtility {
+
+    public float dpHeight;
+    public float dpWidth;
+
+    public ScreenUtility(Activity activity){
+
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+
+        display.getMetrics(displayMetrics);
+
+        float density = activity.getResources().getDisplayMetrics().density;
+
+        dpHeight = displayMetrics.heightPixels/density;
+        dpWidth = displayMetrics.widthPixels/density;
+
+    }
+
+    public float getDpHeight() {
+        return dpHeight;
+    }
+
+    public float getDpWidth() {
+        return dpWidth;
+    }
+}
