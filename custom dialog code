@@ -1,0 +1,173 @@
+import android.app.Dialog;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.spark121.merchant.R;
+
+
+public class CustomDialog extends Dialog {
+    DialogButtonListener listener;
+    String message,alert;
+    String[] buttonNames;
+    TextView messageText,alertText;
+    Button[] buttons = new Button[2];
+
+    public CustomDialog(Context context, String alert, String message, String[] buttonNames,
+                        DialogButtonListener listener) {
+
+        super(context);
+
+        this.listener = listener;
+        this.message = message;
+        this.alert =alert;
+        this.buttonNames = buttonNames;
+        this.setCancelable(false);
+        getWindow().setBackgroundDrawable(
+                new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        setContentView(R.layout.custom_dialog);
+
+        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        getWindow().setGravity(Gravity.CENTER_HORIZONTAL);
+
+        buttons[0] = (Button) findViewById(R.id.firstButton);
+        buttons[1] = (Button) findViewById(R.id.secondButton);
+        messageText =(TextView)findViewById(R.id.messageText);
+        alertText=(TextView)findViewById(R.id.alertText);
+
+        alertText.setText(alert);
+        messageText.setText(message);
+        for (int i = 0; i < buttonNames.length; i++) {
+            final int j = i;
+            buttons[i].setVisibility(View.VISIBLE);
+            buttons[i].setText(buttonNames[i]);
+
+            buttons[i].setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    dismiss();
+                    if (listener != null)
+                        listener.onButtonClicked(buttonNames[j]);
+
+                }
+            });
+
+        }
+    }
+
+}
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+
+    <!-- frame layout -->
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/print_order_btn_bg"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/respond_btn_bg"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/alertText"
+                    android:layout_width="fill_parent"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="Error!"
+                    android:textColor="@color/white"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/messageText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text=""
+                android:hint=""
+                android:textColor="@android:color/black"
+                android:textSize="22dp"
+                />
+
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/firstButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/respond_btn_bg"
+                    android:onClick="bookMarkDone"
+                    android:padding="10dp"
+                    android:text=""
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/secondButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/respond_btn_bg"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:text=""
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
+
+
+
+
