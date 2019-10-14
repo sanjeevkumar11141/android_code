@@ -1,0 +1,74 @@
+
+
+/*public void sortDatabyJobNo(ArrayList<JobModel> jobModels,final int ascending){
+        sortingArrayList.clear();
+        sortingArrayList.addAll(jobModels);
+
+        Collections.sort(
+                sortingArrayList, new Comparator<JobModel>() {
+                    @Override
+                    public int compare(JobModel lhs, JobModel rhs) {
+
+                        Integer i1 = Integer.parseInt(lhs.jobNo);
+                        Integer i2 = Integer.parseInt(rhs.jobNo);
+                        if(ascending==1){
+                            return i1 > i2 ? 1 : i1 < i2 ? -1 : 0;
+                        }else if(ascending==2){
+                            return i2 > i1 ? 1 : i2 < i1 ? -1 : 0;
+                        }else{
+                            return 0;
+                        }
+                    }
+                });
+    }*/
+
+
+   /* public ArrayList<JobModel> sortByPriority() {
+
+        Collections.sort(
+                FCSLApplication.getInstance().jobModels, new Comparator<JobModel>() {
+
+                    @Override
+                    public int compare(JobModel lhs, JobModel rhs) {
+                        String nameFirst = "", secondSecond = "";
+                        if (lhs.priority != null)
+                            nameFirst = lhs.priority;
+                        if (rhs.priority != null)
+                            secondSecond = rhs.priority;
+                        return nameFirst.toLowerCase()
+                                .compareTo(secondSecond.toLowerCase());
+                    }
+                });
+        return FCSLApplication.getInstance().jobModels;
+    }
+
+
+    Collections.sort(
+            FCSLApplication.getInstance().equipmentTypeListModels, new Comparator<EquipmentTypeListModel>() {
+
+        @Override
+        public int compare(EquipmentTypeListModel lhs, EquipmentTypeListModel rhs) {
+
+            Integer i1=0,i2=0;
+            //sk  if (lhs.sortOrder != null)
+            i1 = Integer.valueOf(lhs.sortOrder);
+            //sk   if (rhs.sortOrder != null)
+            i2 = Integer.valueOf(rhs.sortOrder);
+            return  i1.compareTo(i2);
+        }
+    });
+
+            Collections.sort(
+                    FCSLApplication.getInstance().locationModelArrayList, new Comparator<LocationModel>() {
+        @Override
+        public int compare(LocationModel lhs, LocationModel rhs) {
+            String nameFirst = "", secondSecond = "";
+            if (lhs.description != null)
+                nameFirst = lhs.description;
+            if (rhs.description != null)
+                secondSecond = rhs.description;
+            return nameFirst.toLowerCase().compareTo(secondSecond.toLowerCase());
+        }
+    });
+
+*/
