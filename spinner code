@@ -1,0 +1,90 @@
+public void setLocalitySpinner(String waitTime){
+
+        String guestArray[] = getResources().getStringArray(R.array.wait_time_array);
+        final List<String> minuteList = Arrays.asList(guestArray);
+
+       // ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, minuteList);
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, R.layout.time_spent_row, minuteList);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+       // adapter2.setDropDownViewResource(R.layout.time_spent_row);
+        currentWaitTimeSpinner.setAdapter(adapter2);
+
+        currentWaitTimeSpinner.setSelection(AppUtill.setCurrentWaitTime(waitTime,minuteList));
+       /* ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(this, R.layout.locality_spinner_row, LocalityNameList);
+        adapter2.setDropDownViewResource(R.layout.locality_spinner_row);
+        currentWaitTimeSpinner.setAdapter(adapter2);*/
+
+
+        currentWaitTimeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                currentWaitTimeValue =minuteList.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+    }
+    
+    // select dynamic spinner item 
+    
+    
+    public static int setCurrentWaitTime(String selectedItem,List<String> strings) {
+        /*if(!Util.isStringAvailable(strings,equipmentSize)){
+            strings.add(equipmentSize);
+        }*/
+        int k = 0;
+        for (int i = 0; i < strings.size(); i++) {
+            if (strings.get(i).equalsIgnoreCase(selectedItem)) {
+                k = i;
+                break;
+            } else {
+                k = 0;
+            }
+        }
+        return k;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    <FrameLayout
+                android:layout_weight="1.5"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/print_order_btn_bg"
+                android:layout_marginRight="0dp"
+                android:layout_marginLeft="10dp"
+                >
+
+                <Spinner
+                    android:id="@+id/currentWaitTimeSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="2dp"
+                    android:background="@drawable/spinner_bg"
+                    >
+
+                </Spinner>
+
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center"
+                    android:layout_marginRight="18dp"
+                    android:background="@mipmap/drop_icon"
+                    />
+
+            </FrameLayout>
+    
+    
