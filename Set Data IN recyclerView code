@@ -1,0 +1,14 @@
+public void setDataOnList(List<Category> categoryList) {
+
+
+        ArrayList<String> ar = new ArrayList<String>();
+        for(int i=0;i<10;i++){
+            ar.add("sanjeev");
+        }
+
+        MobileOrderAdapter adapter = new MobileOrderAdapter(MobileOrderActivity.this,categoryList);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(llm);
+        recyclerView.setAdapter(adapter);
+    }
