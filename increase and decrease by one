@@ -1,0 +1,40 @@
+ /*groupViewHolder.minusTextView.setOnClickListener(null);
+
+        groupViewHolder.minusTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               // int i = Integer.parseInt(groupViewHolder.quantityTextView.getText().toString());
+                int i = item.quantity;
+                String stringVal;
+
+                if (i > 1) {
+                    i = i - 1;
+                    item.quantity = i;
+                    stringVal = String.valueOf(i);
+                    groupViewHolder.quantityTextView.setText(stringVal);
+                } else {
+                    Log.d("src", "Value can't be less than 0");
+                }
+
+
+                notifyDataSetChanged();
+            }
+        });
+
+        groupViewHolder.plusTextView.setOnClickListener(null);
+
+        groupViewHolder.plusTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              //  int i = Integer.parseInt(groupViewHolder.quantityTextView.getText().toString());
+                int i = item.quantity;
+                String stringVal;
+
+                i = i + 1;
+                item.quantity = i;
+                stringVal = String.valueOf(i);
+                groupViewHolder.quantityTextView.setText(stringVal);
+
+                notifyDataSetChanged();
+            }
+        });*/
