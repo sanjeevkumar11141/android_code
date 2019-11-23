@@ -1,0 +1,8 @@
+public void hiddenInputMethod() {
+
+        InputMethodManager inputMethodManager = (InputMethodManager) ((SettingsActivity) context).getSystemService(context.INPUT_METHOD_SERVICE);
+
+        if (getCurrentFocus() != null) {
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
