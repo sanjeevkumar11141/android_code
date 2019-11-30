@@ -1,0 +1,49 @@
+first you need to improt project as a module in your project.
+
+after that we need to change in setting.gradle file like as:
+
+include ':app'
+include ':myExternalLib'
+project(':myExternalLib').projectDir=new File('/Users/madept/Documents/mdept@dev/munbyn_printer/TestSk/sdk')
+
+
+
+now open your project level build.gradle file and add these line
+
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+
+        flatDir {
+            dirs "${project(':myExternalLib').projectDir}/libs"
+        }
+    }
+}
+
+//https://forum.unity.com/threads/integration-unity-as-a-library-in-native-android-app.685240/ 
+
+
+check this link for add module for more detials;
+
+
+now add app level build.gradle file this line
+
+implementation project(':myExternalLib')
+
+
+
+and also change in module project :
+
+
+You might be importing Application instead of Module. Well you can change it in module's gradle also.
+
+Change
+
+apply plugin: 'com.android.application'
+to
+
+apply plugin: 'com.android.library'
+
+You also need to remove applicationId from the gradle.
