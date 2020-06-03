@@ -74,7 +74,32 @@ public class CustomDialog extends Dialog {
 
 }
 
+public void showDialog(){
 
+        Context context;
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Alert");
+        builder.setMessage("This is the message to show in dialog");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(getApplicationContext(), "Yes Button click", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Toast.makeText(getApplicationContext(), "No Buttion clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+    }
 
 
 <?xml version="1.0" encoding="utf-8"?>
