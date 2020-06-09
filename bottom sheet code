@@ -1,0 +1,18 @@
+ BottomSheetDialog bottomSheetDialog;
+ 
+ private void show_bottom_sheet() {
+        View view = getLayoutInflater().inflate(R.layout.layout_add_money, null);
+        bottomSheetDialog = new BottomSheetDialog(getActivity());
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        text_cancel = (TextView) bottomSheetDialog.findViewById(R.id.text_cancel);
+        img_delete = (ImageView) bottomSheetDialog.findViewById(R.id.img_delete);
+        text_cardno = (TextView) bottomSheetDialog.findViewById(R.id.text_cardno);
+        linear_submit = (LinearLayout) bottomSheetDialog.findViewById(R.id.linear_submit);
+        edit_amt = (EditText) bottomSheetDialog.findViewById(R.id.edit_amt);
+        text_cardno.setOnClickListener(this);
+        img_delete.setOnClickListener(this);
+        text_cancel.setOnClickListener(this);
+        linear_submit.setOnClickListener(this);
+        bottomSheetDialog.show();
+    }
