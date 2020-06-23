@@ -1,0 +1,199 @@
+package com.sanju007.demotest;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+    String TAG = "PhoneActivityTAG";
+    Activity activity = MainActivity.this;
+    String wantPermission = Manifest.permission.READ_PHONE_STATE;
+    private static final int PERMISSION_REQUEST_CODE = 1;
+    ArrayList<String> _mst = new ArrayList<>();
+
+    Button button;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        button = (Button) findViewById(R.id.button);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // testMethod();
+                //otherMethod();
+                getData();
+            }
+        });
+
+
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void otherMethod() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            /*List<SubscriptionInfo> _sb = SubscriptionManager.from(getApplicationContext()).getActiveSubscriptionInfoList();
+            for (int i = 1; i < _sb.size(); i++) {
+                SubscriptionInfo info = _sb.get(i);
+                Log.d(TAG, "Mobile_number " + info.getNumber());
+
+            }*/
+
+
+            TelephonyManager phoneMgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+
+            if (SubscriptionManager.from(this).getActiveSubscriptionInfoCount() > 0) {
+                ArrayList<String> _lst = new ArrayList<>();
+                for (int i = 0; i < SubscriptionManager.from(this).getActiveSubscriptionInfoList().size(); i++) {
+                    _lst.add("\n".concat(String.valueOf(phoneMgr.createForSubscriptionId(i).getCallState())));
+                    _lst.add("\nIMEI NUMBER : " + phoneMgr.createForSubscriptionId(i).getImei());
+                    _lst.add("\nMOBILE NUMBER : ".concat(phoneMgr.createForSubscriptionId(i).getLine1Number()));
+                    _lst.add("\nSERIAL NUMBER : ".concat(phoneMgr.createForSubscriptionId(i).getSimSerialNumber()));
+                    _lst.add("\nSIM OPERATOR NAME : " + phoneMgr.createForSubscriptionId(i).getSimOperatorName());
+                    _lst.add("\nMEI NUMBER : " + phoneMgr.createForSubscriptionId(i).getMeid());
+                    _lst.add("\nSIM STATE : ".concat(String.valueOf(phoneMgr.createForSubscriptionId(i).getSimState())));
+                    _lst.add("\nCOUNTRY ISO : " + phoneMgr.createForSubscriptionId(i).getSimCountryIso());
+                }
+                //  return _lst;
+                System.out.println();
+            }
+        }
+    }
+
+
+    public void testMethod() {
+
+        if (!checkPermission(wantPermission)) {
+            requestPermission(wantPermission);
+        } else {
+
+            Log.d(TAG, "Phone number: " + getPhone());
+            _mst = getPhone();
+
+            for (String op : _mst) {
+                Log.i("Device Information", String.valueOf(op));
+            }
+        }
+    }
+
+
+    public void getData() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+            SubscriptionManager subscriptionManager = SubscriptionManager.from(getApplicationContext());
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            List<SubscriptionInfo> subsInfoList = subscriptionManager.getActiveSubscriptionInfoList();
+
+            Log.d("Test", "Current list = " + subsInfoList);
+
+            for (SubscriptionInfo subscriptionInfo : subsInfoList) {
+
+                String number = subscriptionInfo.getNumber();
+
+                Log.d("Test", " Number is  " + number);
+            }
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private ArrayList<String> getPhone() {
+        TelephonyManager phoneMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(activity, wantPermission) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+        /*7 = "COUNTRY ISO :-in"
+        6 = "SIM STATE :-5"
+        5 = "MEI NUMBER :-00000000000000"
+        4 = "SIM OPERATOR NAME :-Jio 4G"
+        3 = "SERIAL NUMBER :-89918720400018779718"
+        2 = "MOBILE NUMBER :-917011599088"
+        1 = "IMEI NUMBER :-868102041839247"
+        0 = "0"*/
+
+        ArrayList<String> _lst =new ArrayList<>();
+        _lst.add(String.valueOf(phoneMgr.getCallState()));
+        _lst.add("IMEI NUMBER :-"+phoneMgr.getImei());
+        _lst.add("MOBILE NUMBER :-"+phoneMgr.getLine1Number());
+        _lst.add("SERIAL NUMBER :-"+phoneMgr.getSimSerialNumber());
+        _lst.add("SIM OPERATOR NAME :-"+phoneMgr.getSimOperatorName());
+        _lst.add("MEI NUMBER :-"+phoneMgr.getMeid());
+        _lst.add("SIM STATE :-"+String.valueOf(phoneMgr.getSimState()));
+        _lst.add("COUNTRY ISO :-"+phoneMgr.getSimCountryIso());
+        return _lst;
+    }
+
+    private void requestPermission(String permission){
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)){
+            Toast.makeText(activity, "Phone state permission allows us to get phone number. Please allow it for additional functionality.", Toast.LENGTH_LONG).show();
+        }
+        ActivityCompat.requestPermissions(activity, new String[]{permission},PERMISSION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Phone number: " + getPhone());
+                } else {
+                    Toast.makeText(activity,"Permission Denied. We can't get phone number.", Toast.LENGTH_LONG).show();
+                }
+                break;
+        }
+    }
+
+    private boolean checkPermission(String permission){
+        if (Build.VERSION.SDK_INT >= 23) {
+            int result = ContextCompat.checkSelfPermission(activity, permission);
+            if (result == PackageManager.PERMISSION_GRANTED){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+}
