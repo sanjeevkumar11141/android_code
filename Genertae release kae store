@@ -1,0 +1,4 @@
+keytool -list -v -keystore D:\ws_mobulous\MY_KEY\key.jks -alias sanjeev
+
+
+
