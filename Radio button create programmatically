@@ -1,0 +1,31 @@
+ public void  createRadioButton(){
+
+        int paddingDp = 10;
+        float density = getResources().getDisplayMetrics().density;
+        int paddingPixel = (int)(paddingDp * density);
+
+
+        List<String> paymentOptionNameList = new ArrayList<>();
+        paymentOptionNameList.add("9% on 10 Days");
+        paymentOptionNameList.add("10% on 20 Days");
+        paymentOptionNameList.add("13% on 30 Days");
+        RadioGroup repaymentRadioGroup = (RadioGroup) findViewById(R.id.repaymentRadioGroup);
+        RadioGroup.LayoutParams rprms;
+
+        for (int i = 0; i < paymentOptionNameList.size(); i++) {
+            RadioButton rbn = new RadioButton(this);
+            rbn.setId(View.generateViewId());
+            rbn.setText(paymentOptionNameList.get(i));
+            rbn.setButtonDrawable(getResources().getDrawable(R.drawable.custom_radio_button));
+            rbn.setOnClickListener(this);
+            rbn.setPadding(paddingPixel,paddingPixel,paddingPixel,paddingPixel);
+            rprms= new RadioGroup.LayoutParams(RadioGroup.LayoutParams.WRAP_CONTENT, RadioGroup.LayoutParams.WRAP_CONTENT);
+            repaymentRadioGroup.addView(rbn, rprms);
+
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        repaymentOption = ((RadioButton)v).getText().toString();
+    }
