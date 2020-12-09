@@ -1,0 +1,138 @@
+
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.util.Log;
+import android.view.View;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ContactListActivity extends AppCompatActivity {
+
+    private static final int CONTACT_REQUEST_CODE = 1239;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_contact_list);
+        findViewById(R.id.button11).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(ContextCompat.checkSelfPermission(ContactListActivity.this,
+                        Manifest.permission.READ_CONTACTS)  == PackageManager.PERMISSION_GRANTED){
+                    getContactList();
+                }else{
+                    ActivityCompat.requestPermissions(ContactListActivity.this,new String[]{Manifest.permission.READ_CONTACTS},CONTACT_REQUEST_CODE);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if(requestCode == CONTACT_REQUEST_CODE){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                getContactList();
+            }
+        }
+    }
+
+    List<ContactModel> contactModelArrayList = new ArrayList();
+
+    private void getContactList() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                contactModelArrayList.clear();
+               /* try {
+                    Thread.sleep(10000);
+                }catch(Exception e){
+
+                }*/
+                ContentResolver cr = getContentResolver();
+                Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
+                        null, null, null, null);
+
+
+                if ((cur != null ? cur.getCount() : 0) > 0) {
+                    while (cur != null && cur.moveToNext()) {
+                        String id = cur.getString(
+                                cur.getColumnIndex(ContactsContract.Contacts._ID));
+                        ContactModel contactModel=new ContactModel();
+
+                        String name = cur.getString(cur.getColumnIndex(
+                                ContactsContract.Contacts.DISPLAY_NAME));
+
+                        if (cur.getInt(cur.getColumnIndex(
+                                ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                            Cursor pCur = cr.query(
+                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                    null,
+                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                                    new String[]{id}, null);
+                            while (pCur.moveToNext()) {
+                                String phoneNo = pCur.getString(pCur.getColumnIndex(
+                                        ContactsContract.CommonDataKinds.Phone.NUMBER));
+                                Log.i("name", "Name: " + name);
+                                Log.i("phone", "Phone Number: " + phoneNo);
+
+                                contactModel.setfName(name);
+                                contactModel.setPhone(phoneNo);
+
+                            }
+                            pCur.close();
+                        }else{
+                            contactModel.setfName(name);
+                            contactModel.setPhone("----");
+                        }
+                        contactModelArrayList.add(contactModel);
+                    }
+                }
+                if(cur!=null){
+                    cur.close();
+                }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int count=0;
+                        for (ContactModel model:contactModelArrayList) {
+                            count++;
+                            Log.d("Contact Number", "run: "+model.getPhone());
+                            Log.d("Contact Number", "run: "+model.getfName());
+                            if(count == 10){
+                                break;
+                            }
+                        }
+                    }
+                });
+                /*getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ViewUtil.hideProgressBar(rotateAnimation,getActivity());
+                        recyclerView.setNestedScrollingEnabled(false);
+                        //d  appContactAdapter = new AppContactAdapter(getActivity(), new DataBase(getActivity()).getMultiplePlayerInfo(friendsDataList), getActivity().getSupportFragmentManager(), activityId, From);
+                        appContactAdapter = new AppContactAdapter(getActivity(), ViewUtil.sortList(contactModelArrayList), getActivity().getSupportFragmentManager(), activityId, From,  FriendAppContactListFragment.this);
+                        recyclerView.setAdapter(appContactAdapter);
+                        recyclerView.setHasFixedSize(true);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+                        recyclerView.setItemAnimator(new DefaultItemAnimator());
+                    }
+                });*/
+
+            }
+        }).start();
+
+        // return contactModelArrayList;
+    }
+}
