@@ -35,3 +35,19 @@ public void getDeviceHeight() {
         bottomSheetMaxHeight = height - h;
         bottomSheet.setMaxHeight(bottomSheetMaxHeight);
     }
+    
+    
+    // set a global layout listener which will be called when the layout pass is completed and the view is drawn
+        view.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    public void onGlobalLayout() {
+                        //Remove the listener before proceeding
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        } else {
+                            view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        }
+                        getDeviceHeight();
+                    }
+                }
+        );
