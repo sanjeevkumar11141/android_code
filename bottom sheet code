@@ -16,3 +16,22 @@
         linear_submit.setOnClickListener(this);
         bottomSheetDialog.show();
     }
+
+
+public void getDeviceHeight() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        Rect rectf = new Rect();
+        mapChipGroup.getGlobalVisibleRect(rectf);
+       /* Log.d("WIDTH        :", String.valueOf(rectf.width()));
+        Log.d("HEIGHT       :", String.valueOf(rectf.height()));
+        Log.d("left         :", String.valueOf(rectf.left));
+        Log.d("right        :", String.valueOf(rectf.right));
+        Log.d("top          :", String.valueOf(rectf.top));
+        Log.d("bottom       :", String.valueOf(rectf.bottom));*/
+        int h = rectf.bottom + 120;
+        bottomSheetMaxHeight = height - h;
+        bottomSheet.setMaxHeight(bottomSheetMaxHeight);
+    }
