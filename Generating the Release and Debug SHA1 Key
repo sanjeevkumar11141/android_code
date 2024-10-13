@@ -1,0 +1,9 @@
+FoR generatinf the the debug SHA1 Key Run this command in terminal
+
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+
+
+For Release sha1 key Run this commands in terminals
+
+keytool -list -v -keystore <path_to_your_keystore> -alias <alias>
+Example :: keytool -list -v -keystore /path/to/your/release-key.jks -alias your_alias
